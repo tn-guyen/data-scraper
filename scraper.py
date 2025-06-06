@@ -1,5 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
+from Objects.course_code import *
+from Objects.course import *
+from Objects.coordinator import *
 
 """
 Beautiful Soup Documentation:
@@ -59,6 +62,8 @@ def scrapInfo(urls: dict):
             
         elif array[8].startswith("bp"):
             print("getting degree plan info")
+            degree = soup.find('h1').text.split("-")[1].split(" ")
+            print(degree[2])
             data = soup.find(class_="rmit-bs plan-page both")
             text = data.get_text(separator="\n", strip=True)
             cleaned = "\n".join(text.splitlines()[:200])
@@ -66,15 +71,20 @@ def scrapInfo(urls: dict):
             # print(text)
 
             courses = data.find_all(class_="courseLine")
+            coursesArray = []
             testlink = ""
             for course in courses:
                 tag = course.find_next("a")
                 name = tag.text
                 link = tag.find_next(href=True)["href"]
-                testlink = link
+                # testlink = link
+                childsoup = getHtml(link)
+                scrapCourseData(coursesArray,childsoup)
+
                 print(name + " :" + link)
-            childsoup = getHtml(testlink)
-            print(childsoup)
+            # childsoup = getHtml(testlink)
+    for i in range(0, 5):
+        print(coursesArray[i].getCode() + ": " + coursesArray[i].getCampus())
 
 
 def getHtml(url):
@@ -84,6 +94,50 @@ def getHtml(url):
     # cleaned = "\n".join(text.splitlines()[:25])
     # result += f"\n--- {url} ---\n{cleaned}\n"
     return soup
+
+def scrapCourseData(coursesArray,childsoup):
+    data = childsoup.find(class_="contentArea")#.find_all("p")
+    # getting course code information
+    term = data.find("table")
+    if term != None:
+        rows = term.find_all("tr")
+        for row in rows:
+            c = Course_Code()
+            col = row.find_all("td")
+            if row.find("p") != None:
+                code = col[0].find("p").text
+                campus = col[1].find("p").text
+                career = col[2].find("p").text
+                school = col[3].find("p").text
+                learning_mode = col[4].find("p").text
+                c.setCode(code)
+                c.setCampus(campus)
+                c.setCareer(career)
+                c.setSchool(school)
+                c.setLearningMode(learning_mode)
+                coursesArray.append(c)
+                # print(code + ": " + campus + ", " + career + ", " + school + ", " + learning_mode)
+        # print(coursesArray)
+        # for j in range(0, len(coursesArray)):
+        #     print(coursesArray[j].getCode() + ": " + coursesArray[j].getCampus())
+
+    # getting course information
+    for d in data.find_all("p"):
+        data_title = d.find("strong")
+        if data_title != None:
+            for dt in data_title:
+                key = dt.text
+                print(key)
+                
+                if d.text.startswith(key):
+                    print(d.text[len(key):])
+                elif len(d.text) == len(key):
+                    break
+                else:
+                    print(d.text)
+        # else:
+        #     print(d.text)
+
 
 # run script
 main()
