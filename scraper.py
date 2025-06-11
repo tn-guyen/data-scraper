@@ -18,7 +18,9 @@ Install Dependancies at top level before running:
 class Scraper:
     def __init__(self):
         self.degreesArray = {}
-        self.coursesArray = []
+        self.coursesArray = {}
+        self.coursesCodeArray = {}
+        self.coordinators = {}
 
     def getSitemap(self):
         xml_dict = {}
@@ -52,23 +54,33 @@ class Scraper:
             
             if len(array) <= 8:
                 degree_name = soup.find('h1').text.lstrip()
-                print(degree_name)
+                # print(degree_name)
                 degree = Degree()
                 degree.setDegreeName(degree_name)
                 self.degreesArray[degree_name] = degree
                 # grabbing course information
                 entry_info = soup.find(class_="qf-wrapper__inner")
                 if entry_info != None:
-                    entry_info = entry_info.find_all("div")
-                    for i in range(0, len(entry_info), 1):
-                        print("".join(entry_info[i].text.split()))
-                        self.scrapEntryInfo(entry_info[i].text, degree_name)
+                    entry_info = entry_info.children
+                    # entry_info = entry_info.find_all("div")
+                    for ei in entry_info:
+                        self.scrapEntryInfo(ei.text, degree_name)
+
+                    # for i in range(0, len(entry_info), 1):
+                    #     print("".join(entry_info[i].text.split()))
+                    #     self.scrapEntryInfo(entry_info[i].text, degree_name)
                         # print(entry_info[i].text)
                     # for ei in entry_info:
                     #     print("".join(ei.text.split()))
                         # print(ei.text.lstrip().rstrip())
-
-                
+                print(degree.getDegreeName())
+                print(degree.getAvailability())
+                print(degree.getEntryScore())
+                print(degree.getDuration())
+                print(degree.getFees())
+                print(degree.getLocation())
+                print(degree.getNextIntake())
+                print(degree.getLocation())    
             elif array[8].startswith("bp"):
                 print("getting degree plan info")
                 degree_name = soup.find('h1').text.split("-")[1].split(" ")
@@ -89,7 +101,7 @@ class Scraper:
                     childsoup = self.getHtml(link)
                     self.scrapCourseData(childsoup)
 
-                    print(name + " :" + link)
+                    # print(name + " :" + link)
                 # childsoup = getHtml(testlink)
             # for i in range(0, 5):
             #     print(coursesArray[i].getCode() + ": " + coursesArray[i].getCampus())
@@ -97,7 +109,7 @@ class Scraper:
 
 
     def getHtml(self, url):
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=15)
         soup = BeautifulSoup(response.text, "html.parser")
         # text = soup.get_text(separator="\n", strip=True)
         # cleaned = "\n".join(text.splitlines()[:25])
@@ -106,12 +118,13 @@ class Scraper:
 
     def scrapCourseData(self, childsoup):
         data = childsoup.find(class_="contentArea")#.find_all("p")
+        course = Course()
         # getting course code information
         term = data.find("table")
         if term != None:
             rows = term.find_all("tr")
             for row in rows:
-                c = Course_Code()
+                c = CourseCode()
                 col = row.find_all("td")
                 if row.find("p") != None:
                     code = col[0].find("p").text
@@ -124,48 +137,89 @@ class Scraper:
                     c.setCareer(career)
                     c.setSchool(school)
                     c.setLearningMode(learning_mode)
-                    self.coursesArray.append(c)
+                    self.coursesCodeArray.update({code : c})
+                    course.updateCourseCode(c)
                     # print(code + ": " + campus + ", " + career + ", " + school + ", " + learning_mode)
             # print(coursesArray)
             # for j in range(0, len(coursesArray)):
             #     print(coursesArray[j].getCode() + ": " + coursesArray[j].getCampus())
-
-        # getting course information
+        
+        # getting course coordinator information
+        coordinator = Coordinator()
         for d in data.find_all("p"):
-            data_title = d.find("strong")
-            if data_title != None:
-                for dt in data_title:
-                    key = dt.text
-                    print(key)
+            d_text = d.text
+            if ":" in d_text:
+                info = d_text.split(":")
+                if info[0] == "Course Coordinator":
+                    coordinator.setCoordinatorName(info[1].lstrip())
+                elif info[0] == "Course Coordinator Phone":
+                    coordinator.setCoordinatorPhone(info[1].lstrip())
+                elif info[0] == "Course Coordinator Email":
+                    coordinator.setCoordinatorEmail(info[1].lstrip())
+                elif info[0] == "Course Coordinator Location":
+                    coordinator.setCoordinatorLocation(info[1].lstrip())
+                elif info[0] == "Course Coordinator Availability":
+                    coordinator.setCoordinatorAvailability(info[1].lstrip())
+            elif d == "Pre-requisite Courses and Assumed Knowledge and Capabilities":
+                line = childsoup.find(text=d_text).next_sibling
+                while "<strong>" not in line:
+                    print(line.text)
+                    line = childsoup.find(text=line.text).next_sibling
+                print()
+        self.coordinators.update({coordinator.getCoordinatorName : coordinator})
+        course.setCourseCoordinator(coordinator.getCoordinatorName())
+            # data_title = d.find("strong")
+            # if data_title != None:
+            #     for dt in data_title:
+            #         key = dt.text
+            #         print(key)
                     
-                    if d.text.startswith(key):
-                        print(d.text[len(key):])
-                    elif len(d.text) == len(key):
-                        break
-                    else:
-                        print(d.text)
+            #         if d.text.startswith(key):
+            #             print(d.text[len(key):])
+            #         elif len(d.text) == len(key):
+            #             break
+            #         else:
+            #             print(d.text)
             # else:
             #     print(d.text)
 
     def scrapEntryInfo(self, data: str, degree_name: str):
-        print(data)
-        info = data.split(":")
-        degree: Degree = self.degreesArray.get(degree_name)
+        # print(data)
+        if ":" in data:
+            degree: Degree = self.degreesArray.get(degree_name)
 
-        print(info[0])
-        if info[0] == "Student type":
-            print(info[1])
-            # types = info[1].split()
-        elif info[0] == "Entry score":
-            print()
-        elif info[0] == "Duration":
-            print()
-        elif info[0] == "Fees":
-            print()
-        elif info[0] == "Next intake":
-            print()
-        elif info[0] == "Location":
-            print()
+            info = data.split(":")
+            heading = " ".join(info[0].split())
+            value = " ".join(info[1].split())
+            if heading == "Student type":
+                types = value.split(" ")
+                for t in types:
+                    degree.setAvailability(t.lower(), True)
+            elif heading == "Entry score":
+                if degree.getEntryScore().get("domestic") == None:
+                    degree.setEntryScore("domestic", value)
+                else:
+                    degree.setEntryScore("international", value)
+            elif heading == "Duration":
+                if degree.getDuration().get("domestic") == None:
+                    degree.setDuration("domestic", value)
+                else:
+                    degree.setDuration("international", value)
+            elif heading == "Fees":
+                if degree.getFees().get("domestic") == None:
+                    degree.setFees("domestic", value)
+                else:
+                    degree.setDuration("international", value)
+            elif heading == "Next intake":
+                if degree.getNextIntake().get("domestic") == None:
+                    degree.setLearningMode("domestic", value)
+                else:
+                    degree.setNextIntake("international", value)
+            elif heading == "Location":
+                if degree.getLocation().get("domestic") == None:
+                    degree.setLocation("domestic", value)
+                else:
+                    degree.setLocation("international", value)
         
 
     # run script

@@ -40,23 +40,23 @@ class Degree:
     def setDegreeName(self, degree_name: str):
         self.degree_name = degree_name
 
-    def setAvailability(self, availability: dict):
-        self.availability = availability
+    def setAvailability(self, student_type: str, value: bool):
+        self.availability.update({student_type: value})
 
-    def setLearningMode(self, learning_mode: dict):
-        self.learning_mode = learning_mode
+    def setLearningMode(self, student_type: str, learning_mode: str):
+        self.learning_mode.update({student_type: learning_mode})
 
-    def setEntryScore(self, entry_score: dict):
-        self.entry_score = entry_score
+    def setEntryScore(self, student_type: str, entry_score: str):
+        self.entry_score.update({student_type: entry_score})
 
-    def setDuration(self, duration: dict):
-        self.duration = duration
+    def setDuration(self, student_type: str, duration: str):
+        self.duration.update({student_type: duration})
 
-    def setFees(self, fees: dict):
-        self.fees = fees
+    def setFees(self, student_type: str, fees: str):
+        self.fees.update({student_type: fees})
 
-    def setNextIntake(self, next_intake: dict):
-        self.next_intake = next_intake
+    def setNextIntake(self, student_type: str, next_intake: str):
+        self.next_intake.update({student_type: next_intake})
 
-    def setLocation(self, location: dict):
-        self.location = location
+    def setLocation(self, student_type: str, location: str):
+        self.location.update({student_type: location})

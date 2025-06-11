@@ -1,3 +1,5 @@
+from Objects.course_code import *
+
 class Course:
     def __init__(self):
         self.course_title = None
@@ -7,13 +9,13 @@ class Course:
         self.prerequisites = {}
         self.description = None
 
-    def __init__(self, course_title, course_code, credit_points, course_coordinator, prerequisites, description):
-        self.course_title = course_title
-        self.course_code = course_code
-        self.credit_points = credit_points
-        self.course_coordinator = course_coordinator
-        self.prerequisites = prerequisites
-        self.description = description
+    # def __init__(self, course_title, course_code, credit_points, course_coordinator, prerequisites, description):
+    #     self.course_title = course_title
+    #     self.course_code = course_code
+    #     self.credit_points = credit_points
+    #     self.course_coordinator = course_coordinator
+    #     self.prerequisites = prerequisites
+    #     self.description = description
 
     def getCourseTitle(self):
         return self.course_title
@@ -50,3 +52,6 @@ class Course:
 
     def setDescription(self, description):
         self.description = description
+    
+    def updateCourseCode(self, course_code: CourseCode):
+        self.course_code.update({course_code.getCode() : course_code})
