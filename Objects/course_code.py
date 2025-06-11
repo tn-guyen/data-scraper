@@ -1,10 +1,10 @@
-class Course_Code:
+class CourseCode:
     code = None
     campus = None
     career = None
     school = None
     learning_mode = None
-    
+
     def __init__(self):
         # self.code = None
         # self.campus = None
@@ -12,23 +12,23 @@ class Course_Code:
         # self.school = None
         # self.learning_mode = None
         pass
-    
+
     # getters
     def getCode(self):
         return self.code
-    
+
     def getCampus(self):
         return self.campus
-    
+
     def getCareer(self):
         return self.career
-    
+
     def getSchool(self):
         return self.campus
-    
+
     def getLearningMode(self):
         return self.learning_mode
-    
+
     # setters
     def setCode(self, code):
         self.code = code
@@ -38,9 +38,9 @@ class Course_Code:
 
     def setCareer(self, career):
         self.career = career
-    
+
     def setSchool(self, school):
         self.school = school
-    
+
     def setLearningMode(self, learning_mode):
         self.learning_mode = learning_mode
