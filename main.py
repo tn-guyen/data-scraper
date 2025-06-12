@@ -27,8 +27,8 @@ if __name__ == '__main__':
     # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/bp162p23auscy"] = "2024-07-03"
     testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/postgraduate-study/masters-by-coursework/master-of-physiotherapy-mc287"] = "2025-01-13"
     testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/associate-degrees/associate-degree-in-aviation-professional-pilots-ad023"] = "2025-01-13"
-    testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-criminal-justice-bp023"] = "2025-01-13"
-    testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/honours-degrees/bachelor-of-psychology-honours-bh000/bh000ausbu"] = "2025-01-13"
+    # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-criminal-justice-bp023"] = "2025-01-13"
+    # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/honours-degrees/bachelor-of-psychology-honours-bh000/bh000ausbu"] = "2025-01-13"
 
     # getting sitemap
     site_map = scraper.getSitemap()

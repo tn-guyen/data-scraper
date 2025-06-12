@@ -1,19 +1,17 @@
 from Objects.degree_plan import *
 
 class Degree:
-    degree_name = None
-    level_of_study = None
-    availability = {"domestic": "no", "international" : "no"}
-    learning_mode = {"domestic": None, "international" : None}
-    entry_score = {"domestic": None, "international" : None}
-    duration = {"domestic": None, "international" : None}
-    fees = {"domestic": None, "international" : None}
-    next_intake = {"domestic": [], "international": []}
-    location = {"domestic": None, "international" : None}
-    degree_plans = {}
-
-    def __init__(self):
-        pass
+    def __init__(self):      
+        self.degree_name = None
+        self.level_of_study = None
+        self.availability = {"domestic": "no", "international" : "no"}
+        self.learning_mode = {"domestic": None, "international" : None}
+        self.entry_score = {"domestic": None, "international" : None}
+        self.duration = {"domestic": None, "international" : None}
+        self.fees = {"domestic": None, "international" : None}
+        self.next_intake = {"domestic": [], "international": []}
+        self.location = {"domestic": None, "international" : None}
+        self.degree_plans = {}
 
     # Getters
     def getDegreeName(self):

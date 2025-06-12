@@ -1,12 +1,13 @@
 class DegreePlan:
-    degree_name = None
-    plan_code = None
-    credit_description = None
-    major_minor_description = None
-    core_units = {} #{course_code: year}
-    major_options = {}
-    minor_options = {}
-    other_options = {}
+    def __init__(self):
+        self.degree_name = None
+        self.plan_code = None
+        self.credit_description = None
+        self.major_minor_description = None
+        self.core_units = {} #{course_code: year}
+        self.major_options = {}
+        self.minor_options = {}
+        self.other_options = {}
 
     # def __init__(self, degree_name, plan_code, credit_description, major_minor_description, core_units, major_options, minor_options):
     #     self.degree_name = degree_name

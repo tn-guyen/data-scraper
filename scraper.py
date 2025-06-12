@@ -58,13 +58,18 @@ class Scraper:
             array = url.split("/")
             
             soup = self.getHtml(url) #get url html data in html format
+            degree_name = soup.find('h1').text.lstrip()
+            
+            if degree_name in self.degreesArray.keys():
+                degree = self.degreesArray.get(degree)
+            else:
+                degree = Degree()
             
             if len(array) > 0:
-                degree_name = soup.find('h1').text.lstrip()
-                if degree_name not in self.degreesArray:
+                if degree_name not in self.degreesArray.keys():
                     print(degree_name)
                     # print(degree_name + " - " + str(url))
-                    degree = Degree()
+                    
                     degree.setDegreeName(degree_name)
                     self.degreesArray[degree_name] = degree
                     degree.setLevelOfStudy(array[7])
@@ -90,7 +95,7 @@ class Scraper:
                     if len(plansoup.find('h1').text.split("-")) > 1:
                         degree_plan = plansoup.find('h1').text.split("-")[1].split(" ")
                         degree_name = plansoup.find('h1').text.split("-")[0].rstrip()
-                        degree = self.degreesArray.get(degree_name.lstrip())
+                        # degree = self.degreesArray.get(degree_name.lstrip())
                         plan.setDegreeName(degree_name)
                         plan.setPlanCode(degree_plan[2])
                         print(degree_plan[2])
@@ -118,11 +123,11 @@ class Scraper:
                                         if link != "/":
                                             childsoup = self.getHtml(link)
                                             self.scrapCourseData(childsoup)
-                                        self.planSection(section, code, plan)
                                     else:
                                         print("   course scrapped already: " + str(code))
                                 else:
                                     print("    multiple course code - double up")
+                                self.planSection(section, code, plan)
                         if degree != None:
                             degree.setDegreePlans(plan)
 
