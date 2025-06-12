@@ -1,3 +1,5 @@
+from Objects.degree_plan import *
+
 class Degree:
     degree_name = None
     availability = {"domestic": "no", "international" : "no"}
@@ -7,6 +9,7 @@ class Degree:
     fees = {"domestic": None, "international" : None}
     next_intake = {"domestic": [], "international": []}
     location = {"domestic": None, "international" : None}
+    degree_plans = {}
 
     def __init__(self):
         pass
@@ -35,6 +38,9 @@ class Degree:
 
     def getLocation(self):
         return self.location
+    
+    def getDegreePlans(self):
+        return self.degree_plans
 
     # Setters
     def setDegreeName(self, degree_name: str):
@@ -60,3 +66,6 @@ class Degree:
 
     def setLocation(self, student_type: str, location: str):
         self.location.update({student_type: location})
+    
+    def setDegreePlans(self, degree_plan: DegreePlan):
+        self.degree_plans.update({degree_plan.getPlanCode() : degree_plan})

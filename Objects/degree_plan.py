@@ -6,15 +6,16 @@ class DegreePlan:
     core_units = {} #{course_code: year}
     major_options = {}
     minor_options = {}
+    other_options = {}
 
-    def __init__(self, degree_name, plan_code, credit_description, major_minor_description, core_units, major_options, minor_options):
-        self.degree_name = degree_name
-        self.plan_code = plan_code
-        self.credit_description = credit_description
-        self.major_minor_description = major_minor_description
-        self.core_units = core_units
-        self.major_options = major_options
-        self.minor_options = minor_options
+    # def __init__(self, degree_name, plan_code, credit_description, major_minor_description, core_units, major_options, minor_options):
+    #     self.degree_name = degree_name
+    #     self.plan_code = plan_code
+    #     self.credit_description = credit_description
+    #     self.major_minor_description = major_minor_description
+    #     self.core_units = core_units
+    #     self.major_options = major_options
+    #     self.minor_options = minor_options
 
     def getDegreeName(self):
         return self.degree_name
@@ -36,6 +37,9 @@ class DegreePlan:
 
     def getMinorOptions(self):
         return self.minor_options
+    
+    def getOtherOptions(self):
+        return self.other_options
 
     def setDegreeName(self, degree_name):
         self.degree_name = degree_name
@@ -49,11 +53,14 @@ class DegreePlan:
     def setMajorMinorDescription(self, major_minor_description):
         self.major_minor_description = major_minor_description
 
-    def setCoreUnits(self, core_units):
-        self.core_units = core_units
+    def setCoreUnits(self, section,course):
+        self.core_units.update({course : section})
 
-    def setMajorOptions(self, major_options):
-        self.major_options = major_options
+    def setMajorOptions(self, section, course):
+        self.major_options.update({course:section})
 
-    def setMinorOptions(self, minor_options):
-        self.minor_options = minor_options
+    def setMinorOptions(self, section, course):
+        self.minor_options.update({course:section})
+    
+    def setOtherOptions(self, section, course):
+        self.other_options.update({course:section})
