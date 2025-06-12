@@ -2,6 +2,7 @@ from Objects.degree_plan import *
 
 class Degree:
     degree_name = None
+    level_of_study = None
     availability = {"domestic": "no", "international" : "no"}
     learning_mode = {"domestic": None, "international" : None}
     entry_score = {"domestic": None, "international" : None}
@@ -17,6 +18,9 @@ class Degree:
     # Getters
     def getDegreeName(self):
         return self.degree_name
+    
+    def getLevelOfStudy(self):
+        return self.level_of_study
 
     def getAvailability(self):
         return self.availability
@@ -45,6 +49,9 @@ class Degree:
     # Setters
     def setDegreeName(self, degree_name: str):
         self.degree_name = degree_name
+    
+    def setLevelOfStudy(self, level_of_study):
+        self.level_of_study = level_of_study
 
     def setAvailability(self, student_type: str, value: bool):
         self.availability.update({student_type: value})

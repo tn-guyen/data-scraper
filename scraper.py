@@ -53,13 +53,13 @@ class Scraper:
         print("scraping")
         # setting up variables
         degree_name = ""
-
+        
         for url in urls:
             array = url.split("/")
-
+            
             soup = self.getHtml(url) #get url html data in html format
             
-            if len(array) <= 8:
+            if len(array) > 0:
                 degree_name = soup.find('h1').text.lstrip()
                 if degree_name not in self.degreesArray:
                     print(degree_name)
@@ -67,6 +67,7 @@ class Scraper:
                     degree = Degree()
                     degree.setDegreeName(degree_name)
                     self.degreesArray[degree_name] = degree
+                    degree.setLevelOfStudy(array[7])
                     # grabbing course information
                     print("    getting entry information")
                     entry_info = soup.find(class_="qf-wrapper__inner")
@@ -83,6 +84,7 @@ class Scraper:
                 for pu in range(0, int(len(plans_url) / 2)):
                     plan = DegreePlan()
                     href = "https://www.rmit.edu.au" + plans_url[pu].find_next(href=True)["href"]
+                    print(href)
                     plansoup = self.getHtml(href)
                     print("    getting degree plan info: " + plansoup.find('h1').text.lstrip())
                     if len(plansoup.find('h1').text.split("-")) > 1:
@@ -92,12 +94,14 @@ class Scraper:
                         plan.setDegreeName(degree_name)
                         plan.setPlanCode(degree_plan[2])
                         print(degree_plan[2])
-                        data = plansoup.find(class_="rmit-bs plan-page both")
+                        # data = plansoup.find(class_="rmit-bs plan-page both")
+                        # if data == None:
+                        #     data = plansoup.find(class_="rmit-bs plan-page ")
                         # text = data.get_text(separator="\n", strip=True)
                         # cleaned = "\n".join(text.splitlines()[:200])
                         # result += f"\n--- {url} ---\n{cleaned}\n"
                         # print(text)
-                        require_tables = data.find_all(class_="requirementRequirementHTML")
+                        require_tables = plansoup.find_all(class_="requirementRequirementHTML")
                         for rt in require_tables:
                             section = rt.find_previous_sibling().text
                             print(section)
@@ -111,15 +115,16 @@ class Scraper:
                                     link = tag.find_next(href=True)["href"]
                                     if code not in self.coursesArray:
                                         print("   getting course: " + str(code))
-                                        childsoup = self.getHtml(link)
-                                        self.scrapCourseData(childsoup)
+                                        if link != "/":
+                                            childsoup = self.getHtml(link)
+                                            self.scrapCourseData(childsoup)
                                         self.planSection(section, code, plan)
                                     else:
                                         print("   course scrapped already: " + str(code))
                                 else:
                                     print("    multiple course code - double up")
-                                    pass
-                        degree.setDegreePlans(plan)
+                        if degree != None:
+                            degree.setDegreePlans(plan)
 
                         # courses = data.find_all(class_="courseLine")
                         # for course in courses:
@@ -173,71 +178,74 @@ class Scraper:
                 # childsoup = getHtml(testlink)
             # for i in range(0, 5):
             #     print(coursesArray[i].getCode() + ": " + coursesArray[i].getCampus())
-            return self.degreesArray, self.coursesArray, self.coursesCodeArray, self.coordinators
-
-
+        return self.degreesArray, self.coursesArray, self.coursesCodeArray, self.coordinators
 
     def getHtml(self, url):
-        response = requests.get(url, timeout=15)
-        soup = BeautifulSoup(response.text, "html.parser")
-        # text = soup.get_text(separator="\n", strip=True)
-        # cleaned = "\n".join(text.splitlines()[:25])
-        # result += f"\n--- {url} ---\n{cleaned}\n"
-        return soup
+        try:
+            response = requests.get(url, timeout=15)
+            soup = BeautifulSoup(response.text, "html.parser")
+            # text = soup.get_text(separator="\n", strip=True)
+            # cleaned = "\n".join(text.splitlines()[:25])
+            # result += f"\n--- {url} ---\n{cleaned}\n"
+            return soup
+        except:
+            return None
+        
 
     def scrapCourseData(self, childsoup):
-        data = childsoup.find(class_="contentArea")#.find_all("p")
-        course = Course()
-        # getting course code information
-        term = data.find("table")
+        if childsoup != None:
+            data = childsoup.find(class_="contentArea")#.find_all("p")
+            course = Course()
+            # getting course code information
+            term = data.find("table")
 
-        if term != None:
-            rows = term.find_all("tr")
-            for row in rows:
-                c = CourseCode()
-                col = row.find_all("td")
-                if row.find("p") != None and len(rows) > 3:
-                    code = col[0].find("p").text
-                    campus = col[1].find("p").text
-                    career = col[2].find("p").text
-                    school = col[3].find("p").text
-                    learning_mode = col[4].find("p").text
-                    c.setCode(code)
-                    c.setCampus(campus)
-                    c.setCareer(career)
-                    c.setSchool(school)
-                    c.setLearningMode(learning_mode)
-                    self.coursesCodeArray.update({code : c})
-                    course.updateCourseCode(c)
-                    # print(code + ": " + campus + ", " + career + ", " + school + ", " + learning_mode)
-            # print(coursesArray)
-            # for j in range(0, len(coursesArray)):
-            #     print(coursesArray[j].getCode() + ": " + coursesArray[j].getCampus())
-        
-        # getting course coordinator information
-        coordinator = Coordinator()
-        for d in data.find_all("p"):
-            d_text = d.text
-            if ":" in d_text:
-                info = d_text.split(":")
-                if info[0] == "Course Coordinator":
-                    coordinator.setCoordinatorName(info[1].lstrip())
-                elif info[0] == "Course Coordinator Phone":
-                    coordinator.setCoordinatorPhone(info[1].lstrip())
-                elif info[0] == "Course Coordinator Email":
-                    coordinator.setCoordinatorEmail(info[1].lstrip())
-                elif info[0] == "Course Coordinator Location":
-                    coordinator.setCoordinatorLocation(info[1].lstrip())
-                elif info[0] == "Course Coordinator Availability":
-                    coordinator.setCoordinatorAvailability(info[1].lstrip())
-            elif d == "Pre-requisite Courses and Assumed Knowledge and Capabilities":
-                line = childsoup.find(text=d_text).next_sibling
-                while "<strong>" not in line:
-                    print(line.text)
-                    line = childsoup.find(text=line.text).next_sibling
-                print()
-        self.coordinators.update({coordinator.getCoordinatorName : coordinator})
-        course.setCourseCoordinator(coordinator.getCoordinatorName())
+            if term != None:
+                rows = term.find_all("tr")
+                for row in rows:
+                    c = CourseCode()
+                    col = row.find_all("td")
+                    if row.find("p") != None and len(col) > 3:
+                        code = col[0].find("p").text
+                        campus = col[1].find("p").text
+                        career = col[2].find("p").text
+                        school = col[3].find("p").text
+                        learning_mode = col[4].find("p").text
+                        c.setCode(code)
+                        c.setCampus(campus)
+                        c.setCareer(career)
+                        c.setSchool(school)
+                        c.setLearningMode(learning_mode)
+                        self.coursesCodeArray.update({code : c})
+                        course.updateCourseCode(c)
+                        # print(code + ": " + campus + ", " + career + ", " + school + ", " + learning_mode)
+                # print(coursesArray)
+                # for j in range(0, len(coursesArray)):
+                #     print(coursesArray[j].getCode() + ": " + coursesArray[j].getCampus())
+            
+            # getting course coordinator information
+            coordinator = Coordinator()
+            for d in data.find_all("p"):
+                d_text = d.text
+                if ":" in d_text:
+                    info = d_text.split(":")
+                    if info[0] == "Course Coordinator":
+                        coordinator.setCoordinatorName(info[1].lstrip())
+                    elif info[0] == "Course Coordinator Phone":
+                        coordinator.setCoordinatorPhone(info[1].lstrip())
+                    elif info[0] == "Course Coordinator Email":
+                        coordinator.setCoordinatorEmail(info[1].lstrip())
+                    elif info[0] == "Course Coordinator Location":
+                        coordinator.setCoordinatorLocation(info[1].lstrip())
+                    elif info[0] == "Course Coordinator Availability":
+                        coordinator.setCoordinatorAvailability(info[1].lstrip())
+                elif d == "Pre-requisite Courses and Assumed Knowledge and Capabilities":
+                    line = childsoup.find(text=d_text).next_sibling
+                    while "<strong>" not in line:
+                        print(line.text)
+                        line = childsoup.find(text=line.text).next_sibling
+                    print()
+            self.coordinators.update({coordinator.getCoordinatorName : coordinator})
+            course.setCourseCoordinator(coordinator.getCoordinatorName())
 
     def scrapEntryInfo(self, data: str, degree_name: str):
         # print(data)
