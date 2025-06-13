@@ -53,26 +53,26 @@ class Scraper:
         print("scraping")
         # setting up variables
         degree_name = ""
-        
+
         for url in urls:
             array = url.split("/")
-            
+
             soup = self.getHtml(url) #get url html data in html format
             degree_name = soup.find('h1').text.lstrip()
-            
+
             if degree_name in self.degreesArray.keys():
                 degree = self.degreesArray.get(degree)
             else:
                 degree = Degree()
-            
+
             if len(array) > 0:
                 if degree_name not in self.degreesArray.keys():
                     print(degree_name)
                     # print(degree_name + " - " + str(url))
-                    
+
                     degree.setDegreeName(degree_name)
                     self.degreesArray[degree_name] = degree
-                    degree.setLevelOfStudy(array[7])
+                    degree.setLevelOfStudy(array[6])
                     # grabbing course information
                     print("    getting entry information")
                     entry_info = soup.find(class_="qf-wrapper__inner")
@@ -83,7 +83,7 @@ class Scraper:
                         print("        completed")
                 else:
                     print("degree exists: " + str(degree_name))
-                
+
                 plans_url = soup.find_all(text="View plan")
 
                 for pu in range(0, int(len(plans_url) / 2)):
@@ -123,6 +123,9 @@ class Scraper:
                                         if link != "/":
                                             childsoup = self.getHtml(link)
                                             self.scrapCourseData(childsoup)
+                                            # changed i made
+                                            # self.scrapCourseData(childsoup, code)
+
                                     else:
                                         print("   course scrapped already: " + str(code))
                                 else:
@@ -195,12 +198,18 @@ class Scraper:
             return soup
         except:
             return None
-        
+
 
     def scrapCourseData(self, childsoup):
+        # changed i made
+    # def scrapCourseData(self, childsoup, code):
         if childsoup != None:
             data = childsoup.find(class_="contentArea")#.find_all("p")
             course = Course()
+
+            course_name = childsoup.find(text="Course Title: ").parent.next_sibling
+            course.setCourseTitle(course_name)
+
             # getting course code information
             term = data.find("table")
 
@@ -215,6 +224,7 @@ class Scraper:
                         career = col[2].find("p").text
                         school = col[3].find("p").text
                         learning_mode = col[4].find("p").text
+                        c.setName(course_name)
                         c.setCode(code)
                         c.setCampus(campus)
                         c.setCareer(career)
@@ -226,7 +236,7 @@ class Scraper:
                 # print(coursesArray)
                 # for j in range(0, len(coursesArray)):
                 #     print(coursesArray[j].getCode() + ": " + coursesArray[j].getCampus())
-            
+
             # getting course coordinator information
             coordinator = Coordinator()
             for d in data.find_all("p"):
@@ -249,8 +259,14 @@ class Scraper:
                         print(line.text)
                         line = childsoup.find(text=line.text).next_sibling
                     print()
-            self.coordinators.update({coordinator.getCoordinatorName : coordinator})
+            self.coordinators.update({coordinator.getCoordinatorName() : coordinator})
             course.setCourseCoordinator(coordinator.getCoordinatorName())
+            self.coursesArray.update({course_name : course})
+
+            # changed i made
+            # course_code = course.getCourseCode()
+            # if course_code:
+            #     self.coursesArray[course] = course
 
     def scrapEntryInfo(self, data: str, degree_name: str):
         # print(data)
@@ -278,10 +294,10 @@ class Scraper:
                 if degree.getFees().get("domestic") == None:
                     degree.setFees("domestic", value)
                 else:
-                    degree.setDuration("international", value)
+                    degree.setFees("international", value)
             elif heading == "Next intake":
                 if degree.getNextIntake().get("domestic") == None:
-                    degree.setLearningMode("domestic", value)
+                    degree.setNextIntake("domestic", value)
                 else:
                     degree.setNextIntake("international", value)
             elif heading == "Location":
@@ -289,7 +305,7 @@ class Scraper:
                     degree.setLocation("domestic", value)
                 else:
                     degree.setLocation("international", value)
-    
+
     def planSection(self, section, course: str, plan: DegreePlan):
         if "Year" in section:
             plan.setCoreUnits(section, course)
@@ -317,6 +333,6 @@ class Scraper:
     #     urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/bp162p23auscy"] = "2024-07-03"
     #     degreesArray = {}
     #     coursesArray = []
-        
+
     #     #run scraper
     #     scrapInfo(urls)

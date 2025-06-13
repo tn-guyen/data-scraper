@@ -6,6 +6,7 @@ from Objects.course import *
 from Objects.coordinator import *
 from Objects.degree import *
 from Objects.degree_plan import *
+# from Objects.course_contact import *
 
 if __name__ == '__main__':
     print("main")
@@ -20,13 +21,13 @@ if __name__ == '__main__':
 
     # test data
     testing_urls = {}
-    # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162"] = "2025-01-13"
+    testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162"] = "2025-01-13"
     # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/admissions-transparency"] = "2024-06-21"
     # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/apply-now"] = "2025-03-11"
     # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/bp162oauscy"] = "2024-07-03"
     # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/bp162p23auscy"] = "2024-07-03"
     testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/postgraduate-study/masters-by-coursework/master-of-physiotherapy-mc287"] = "2025-01-13"
-    testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/associate-degrees/associate-degree-in-aviation-professional-pilots-ad023"] = "2025-01-13"
+    # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/associate-degrees/associate-degree-in-aviation-professional-pilots-ad023"] = "2025-01-13"
     # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-criminal-justice-bp023"] = "2025-01-13"
     # testing_urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/honours-degrees/bachelor-of-psychology-honours-bh000/bh000ausbu"] = "2025-01-13"
 
@@ -49,14 +50,22 @@ if __name__ == '__main__':
                 # print("   not appending: " + str(url))
                 # print("    not appending")
                 pass
-     
+
     #run scraper
     # degreesArray, coursesArray, coursesCodeArray, coordinators = scraper.scrapInfo(urls) #live sitemap scraper
     degreesArray, coursesArray, coursesCodeArray, coordinators = scraper.scrapInfo(testing_urls) #test scraper
     # scraper.scrapInfo(testing_urls)
-    
-    for degrees in degreesArray.values():
-        print(degrees.getDegreeName())
-        print(degrees.getDegreePlans().keys())
-    
-    
+
+    # for degrees in degreesArray.values():
+    #     print(degrees.getDegreeName())
+    #     print(degrees.getDegreePlans().keys())
+
+db_path = "/Users/isaac/Desktop/dcnc.db"
+db_writer = DBWriter(db_path)
+
+# Save scraped data
+# print(len(coursesArray))
+db_writer.writeCoordinator(coordinators)
+db_writer.writeCourseCode(coursesCodeArray)
+db_writer.writeCourses(coursesArray)
+db_writer.writeDegree(degreesArray)

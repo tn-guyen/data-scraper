@@ -1,12 +1,13 @@
 class CourseContact:
-  contact_name = None
-  contact_phone = None
-  contact_email = None
+  def __init__(self):
+    self.contact_name = None
+    self.contact_phone = None
+    self.contact_email = None
 
-  def __init__(self, contact_name, contact_phone, contact_email):
-    self.contact_name = contact_name
-    self.contact_phone = contact_phone
-    self.contact_email = contact_email
+  # def __init__(self, contact_name, contact_phone, contact_email):
+  #   self.contact_name = contact_name
+  #   self.contact_phone = contact_phone
+  #   self.contact_email = contact_email
 
   # Getters
   def getContactName(self):
