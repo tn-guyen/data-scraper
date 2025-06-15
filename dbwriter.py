@@ -125,7 +125,7 @@ class DBWriter:
                             ))
                         for courses in plans.getMajorOptions().keys():
                             cur.execute('''
-                                INSERT INTO option_courses (option_name, course_code)
+                                INSERT or IGNORE INTO option_courses (option_name, course_code)
                                 VALUES (?, ?)
                             ''', (
                                 plans.getMajorOptions().get(courses),
@@ -144,7 +144,7 @@ class DBWriter:
                             ))
                         for courses in plans.getMinorOptions().keys():
                             cur.execute('''
-                                INSERT INTO option_courses (option_name, course_code)
+                                INSERT or IGNORE INTO  option_courses (option_name, course_code)
                                 VALUES (?, ?)
                             ''', (
                                 plans.getMinorOptions().get(courses),
@@ -163,7 +163,7 @@ class DBWriter:
                             ))
                         for courses in plans.getOtherOptions().keys():
                             cur.execute('''
-                                INSERT INTO option_courses (option_name, course_code)
+                                INSERT or IGNORE INTO option_courses (option_name, course_code)
                                 VALUES (?, ?)
                             ''', (
                                 plans.getOtherOptions().get(courses),
@@ -182,7 +182,7 @@ class DBWriter:
             cur = con.cursor()
             for course_contact_obj in array.values():
                 cur.execute('''
-                    INSERT INTO course_coordinator (coordinator_name, coordinator_phone, coordinator_email, coordinator_location, coordinator_availability)
+                    INSERT or IGNORE INTO course_coordinator (coordinator_name, coordinator_phone, coordinator_email, coordinator_location, coordinator_availability)
                     VALUES (?, ?, ?, ?, ?)
                 ''', (
                     course_contact_obj.getCoordinatorName(),

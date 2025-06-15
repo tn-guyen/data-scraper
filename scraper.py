@@ -72,7 +72,7 @@ class Scraper:
 
                     degree.setDegreeName(degree_name)
                     self.degreesArray[degree_name] = degree
-                    degree.setLevelOfStudy(array[6])
+                    degree.setLevelOfStudy(array[6].replace("-", " "))
                     # grabbing course information
                     print("    getting entry information")
                     entry_info = soup.find(class_="qf-wrapper__inner")
@@ -91,7 +91,7 @@ class Scraper:
                     href = "https://www.rmit.edu.au" + plans_url[pu].find_next(href=True)["href"]
                     print(href)
                     plansoup = self.getHtml(href)
-                    print("    getting degree plan info: " + plansoup.find('h1').text.lstrip())
+                    # print("    getting degree plan info: " + plansoup.find('h1').text.lstrip())
                     if len(plansoup.find('h1').text.split("-")) > 1:
                         degree_plan = plansoup.find('h1').text.split("-")[1].split(" ")
                         degree_name = plansoup.find('h1').text.split("-")[0].rstrip()
@@ -108,7 +108,7 @@ class Scraper:
                         # print(text)
                         require_tables = plansoup.find_all(class_="requirementRequirementHTML")
                         for rt in require_tables:
-                            section = rt.find_previous_sibling().text
+                            section = rt.find_previous_sibling(class_="requirementDescription").text
                             print(section)
                             courses = rt.find_all(class_="courseLine")
                             for course in courses:
@@ -119,7 +119,7 @@ class Scraper:
                                     name = tag.text
                                     link = tag.find_next(href=True)["href"]
                                     if code not in self.coursesArray:
-                                        print("   getting course: " + str(code))
+                                        # print("   getting course: " + str(code))
                                         if link != "/":
                                             childsoup = self.getHtml(link)
                                             self.scrapCourseData(childsoup)
@@ -127,9 +127,11 @@ class Scraper:
                                             # self.scrapCourseData(childsoup, code)
 
                                     else:
-                                        print("   course scrapped already: " + str(code))
+                                        # print("   course scrapped already: " + str(code))
+                                        pass
                                 else:
-                                    print("    multiple course code - double up")
+                                    # print("    multiple course code - double up")
+                                    pass
                                 self.planSection(section, code, plan)
                         if degree != None:
                             degree.setDegreePlans(plan)
@@ -206,9 +208,17 @@ class Scraper:
         if childsoup != None:
             data = childsoup.find(class_="contentArea")#.find_all("p")
             course = Course()
-
-            course_name = childsoup.find(text="Course Title: ").parent.next_sibling
+            heading = childsoup.find("h2").next_sibling
+            course_name = heading.text.lstrip("Course Title: ")
+            # course_name = childsoup.find(text="Course Title: ").parent.next_sibling
             course.setCourseTitle(course_name)
+            try:
+                points_string = heading.next_sibling
+                # points_string = childsoup.find(text="Credit Points: ").parent.next_sibling
+                points = int(points_string.text.lstrip("Credit Points: "))
+            except ValueError:
+                points = 0
+            course.setCreditPoints(points)
 
             # getting course code information
             term = data.find("table")
@@ -280,6 +290,11 @@ class Scraper:
                 types = value.split(" ")
                 for t in types:
                     degree.setAvailability(t.lower(), True)
+            elif heading == "Learning mode":
+                if degree.getLearningMode().get("domestic") == None:
+                    degree.setLearningMode("domestic", value)
+                else:
+                    degree.setLearningMode("international", value)
             elif heading == "Entry score":
                 if degree.getEntryScore().get("domestic") == None:
                     degree.setEntryScore("domestic", value)
