@@ -1,4 +1,5 @@
 class CourseCode:
+    name = None
     code = None
     campus = None
     career = None
@@ -14,6 +15,9 @@ class CourseCode:
         pass
 
     # getters
+    def getName(self):
+        return self.name
+
     def getCode(self):
         return self.code
 
@@ -30,6 +34,9 @@ class CourseCode:
         return self.learning_mode
 
     # setters
+    def setName(self, name):
+        self.name = name
+
     def setCode(self, code):
         self.code = code
 

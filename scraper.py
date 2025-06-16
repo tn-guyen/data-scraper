@@ -5,7 +5,6 @@ from Objects.course import *
 from Objects.coordinator import *
 from Objects.degree import *
 from Objects.degree_plan import *
-# from Objects import *
 
 """
 Beautiful Soup Documentation:
@@ -46,33 +45,35 @@ class Scraper:
             loc, lastmod = url.find_next("loc").text, url.find_next("lastmod").text
             xml_dict[loc] = lastmod
 
-        # print(len(xml_dict))
         return xml_dict
 
     def scrapInfo(self, urls: dict):
+        """
+            Grabbing information from website
+        """
+
         print("scraping")
         # setting up variables
         degree_name = ""
-        
+
         for url in urls:
             array = url.split("/")
-            
+
             soup = self.getHtml(url) #get url html data in html format
             degree_name = soup.find('h1').text.lstrip()
-            
+
             if degree_name in self.degreesArray.keys():
                 degree = self.degreesArray.get(degree)
             else:
                 degree = Degree()
-            
+
             if len(array) > 0:
                 if degree_name not in self.degreesArray.keys():
                     print(degree_name)
-                    # print(degree_name + " - " + str(url))
-                    
+                    # getting degree information
                     degree.setDegreeName(degree_name)
                     self.degreesArray[degree_name] = degree
-                    degree.setLevelOfStudy(array[7])
+                    degree.setLevelOfStudy(array[6].replace("-", " "))
                     # grabbing course information
                     print("    getting entry information")
                     entry_info = soup.find(class_="qf-wrapper__inner")
@@ -83,33 +84,32 @@ class Scraper:
                         print("        completed")
                 else:
                     print("degree exists: " + str(degree_name))
-                
-                plans_url = soup.find_all(text="View plan")
 
+                # getting degree plans
+                plans_url = soup.find_all(text="View plan")
                 for pu in range(0, int(len(plans_url) / 2)):
                     plan = DegreePlan()
                     href = "https://www.rmit.edu.au" + plans_url[pu].find_next(href=True)["href"]
                     print(href)
                     plansoup = self.getHtml(href)
-                    print("    getting degree plan info: " + plansoup.find('h1').text.lstrip())
                     if len(plansoup.find('h1').text.split("-")) > 1:
+                        # getting degree plan information
                         degree_plan = plansoup.find('h1').text.split("-")[1].split(" ")
                         degree_name = plansoup.find('h1').text.split("-")[0].rstrip()
-                        # degree = self.degreesArray.get(degree_name.lstrip())
+
+                        # set degree plan information
                         plan.setDegreeName(degree_name)
                         plan.setPlanCode(degree_plan[2])
                         print(degree_plan[2])
-                        # data = plansoup.find(class_="rmit-bs plan-page both")
-                        # if data == None:
-                        #     data = plansoup.find(class_="rmit-bs plan-page ")
-                        # text = data.get_text(separator="\n", strip=True)
-                        # cleaned = "\n".join(text.splitlines()[:200])
-                        # result += f"\n--- {url} ---\n{cleaned}\n"
-                        # print(text)
+
+                        # getting degree plan information by table sections
                         require_tables = plansoup.find_all(class_="requirementRequirementHTML")
                         for rt in require_tables:
-                            section = rt.find_previous_sibling().text
+                            # getting core/major/minor/options type
+                            section = rt.find_previous_sibling(class_="requirementDescription").text
                             print(section)
+
+                            # getting plan section courses
                             courses = rt.find_all(class_="courseLine")
                             for course in courses:
                                 columns = course.find_all("td")
@@ -119,91 +119,48 @@ class Scraper:
                                     name = tag.text
                                     link = tag.find_next(href=True)["href"]
                                     if code not in self.coursesArray:
-                                        print("   getting course: " + str(code))
+                                        # gets course link
                                         if link != "/":
                                             childsoup = self.getHtml(link)
                                             self.scrapCourseData(childsoup)
-                                    else:
-                                        print("   course scrapped already: " + str(code))
-                                else:
-                                    print("    multiple course code - double up")
                                 self.planSection(section, code, plan)
                         if degree != None:
                             degree.setDegreePlans(plan)
-
-                        # courses = data.find_all(class_="courseLine")
-                        # for course in courses:
-                        #     columns = course.find_all("td")
-                        #     if len(columns) > 2:
-                        #         code = columns[2].text
-                        #         tag = course.find_next("a")
-                        #         name = tag.text
-                        #         link = tag.find_next(href=True)["href"]
-                        #         if code not in self.coursesArray:
-                        #             print("   getting course: " + str(code))
-                        #             childsoup = self.getHtml(link)
-                        #             self.scrapCourseData(childsoup)
-                        #             print("        completed")
-                        #         else:
-                        #             print("   course scrapped already: " + str(code))
-                        #     else:
-                        #         print("    multiple course code - double up")
-                        #         pass
-            # elif array[8].startswith("bp"):
-            # else:
-            #     print("getting degree plan info: " + soup.find('h1').text)
-            #     if len(soup.find('h1').text.split("-")) > 2:
-            #         degree_plan = soup.find('h1').text.split("-")[1].split(" ")
-            #         degree_name = soup.find('h1').text.split("-")[0].rstrip()
-            #         degree = self.degreesArray.get(degree_name)
-            #         print(degree_plan[2])
-            #         data = soup.find(class_="rmit-bs plan-page both")
-            #         text = data.get_text(separator="\n", strip=True)
-            #         cleaned = "\n".join(text.splitlines()[:200])
-            #         # result += f"\n--- {url} ---\n{cleaned}\n"
-            #         # print(text)
-
-            #         courses = data.find_all(class_="courseLine")
-            #         testlink = ""
-            #         for course in courses:
-            #             columns = course.find_all("td")
-            #             code = columns[2].text
-            #             tag = course.find_next("a")
-            #             name = tag.text
-            #             link = tag.find_next(href=True)["href"]
-            #             # testlink = link
-            #             if code not in self.coursesArray:
-            #                 print("   getting course: " + str(code))
-            #                 childsoup = self.getHtml(link)
-            #                 self.scrapCourseData(childsoup)
-            #             else:
-            #                 print("   course scrapped already: " + str(code))
-
-                    # print(name + " :" + link)
-                # childsoup = getHtml(testlink)
-            # for i in range(0, 5):
-            #     print(coursesArray[i].getCode() + ": " + coursesArray[i].getCampus())
         return self.degreesArray, self.coursesArray, self.coursesCodeArray, self.coordinators
 
     def getHtml(self, url):
+        """
+            Get HTML of link
+        """
         try:
             response = requests.get(url, timeout=15)
             soup = BeautifulSoup(response.text, "html.parser")
-            # text = soup.get_text(separator="\n", strip=True)
-            # cleaned = "\n".join(text.splitlines()[:25])
-            # result += f"\n--- {url} ---\n{cleaned}\n"
             return soup
         except:
             return None
-        
+
 
     def scrapCourseData(self, childsoup):
+        """
+            Grabs the course data from course page
+        """
         if childsoup != None:
             data = childsoup.find(class_="contentArea")#.find_all("p")
             course = Course()
+            heading = childsoup.find("h2").next_sibling
+            course_name = heading.text.lstrip("Course Title: ")
+            # course_name = childsoup.find(text="Course Title: ").parent.next_sibling
+            course.setCourseTitle(course_name)
+            try:
+                points_string = heading.next_sibling
+                # points_string = childsoup.find(text="Credit Points: ").parent.next_sibling
+                points = int(points_string.text.lstrip("Credit Points: "))
+            except ValueError:
+                points = 0
+            course.setCreditPoints(points)
+
             # getting course code information
             term = data.find("table")
-
             if term != None:
                 rows = term.find_all("tr")
                 for row in rows:
@@ -215,6 +172,7 @@ class Scraper:
                         career = col[2].find("p").text
                         school = col[3].find("p").text
                         learning_mode = col[4].find("p").text
+                        c.setName(course_name)
                         c.setCode(code)
                         c.setCampus(campus)
                         c.setCareer(career)
@@ -222,11 +180,7 @@ class Scraper:
                         c.setLearningMode(learning_mode)
                         self.coursesCodeArray.update({code : c})
                         course.updateCourseCode(c)
-                        # print(code + ": " + campus + ", " + career + ", " + school + ", " + learning_mode)
-                # print(coursesArray)
-                # for j in range(0, len(coursesArray)):
-                #     print(coursesArray[j].getCode() + ": " + coursesArray[j].getCampus())
-            
+
             # getting course coordinator information
             coordinator = Coordinator()
             for d in data.find_all("p"):
@@ -249,11 +203,14 @@ class Scraper:
                         print(line.text)
                         line = childsoup.find(text=line.text).next_sibling
                     print()
-            self.coordinators.update({coordinator.getCoordinatorName : coordinator})
+            self.coordinators.update({coordinator.getCoordinatorName() : coordinator})
             course.setCourseCoordinator(coordinator.getCoordinatorName())
+            self.coursesArray.update({course_name : course})
 
     def scrapEntryInfo(self, data: str, degree_name: str):
-        # print(data)
+        """
+            Grabs the degree entry information
+        """
         if ":" in data:
             degree: Degree = self.degreesArray.get(degree_name)
 
@@ -264,6 +221,11 @@ class Scraper:
                 types = value.split(" ")
                 for t in types:
                     degree.setAvailability(t.lower(), True)
+            elif heading == "Learning mode":
+                if degree.getLearningMode().get("domestic") == None:
+                    degree.setLearningMode("domestic", value)
+                else:
+                    degree.setLearningMode("international", value)
             elif heading == "Entry score":
                 if degree.getEntryScore().get("domestic") == None:
                     degree.setEntryScore("domestic", value)
@@ -278,10 +240,10 @@ class Scraper:
                 if degree.getFees().get("domestic") == None:
                     degree.setFees("domestic", value)
                 else:
-                    degree.setDuration("international", value)
+                    degree.setFees("international", value)
             elif heading == "Next intake":
                 if degree.getNextIntake().get("domestic") == None:
-                    degree.setLearningMode("domestic", value)
+                    degree.setNextIntake("domestic", value)
                 else:
                     degree.setNextIntake("international", value)
             elif heading == "Location":
@@ -289,8 +251,11 @@ class Scraper:
                     degree.setLocation("domestic", value)
                 else:
                     degree.setLocation("international", value)
-    
+
     def planSection(self, section, course: str, plan: DegreePlan):
+        """
+            Grabs the degree plan data
+        """
         if "Year" in section:
             plan.setCoreUnits(section, course)
         else:
@@ -304,19 +269,3 @@ class Scraper:
                     plan.setMinorOptions(section, course)
             else:
                 plan.setOtherOptions(section, course)
-
-    # run script
-    # if __name__ == '__main__':
-    #     print("main")
-    #     # test data
-    #     urls = {}
-    #     urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162"] = "2025-01-13"
-    #     urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/admissions-transparency"] = "2024-06-21"
-    #     urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/apply-now"] = "2025-03-11"
-    #     urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/bp162oauscy"] = "2024-07-03"
-    #     urls["https://www.rmit.edu.au/study-with-us/levels-of-study/undergraduate-study/bachelor-degrees/bachelor-of-information-technology-bp162/bp162p23auscy"] = "2024-07-03"
-    #     degreesArray = {}
-    #     coursesArray = []
-        
-    #     #run scraper
-    #     scrapInfo(urls)

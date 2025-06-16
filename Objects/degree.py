@@ -1,22 +1,22 @@
 from Objects.degree_plan import *
 
 class Degree:
-    def __init__(self):      
+    def __init__(self):
         self.degree_name = None
         self.level_of_study = None
-        self.availability = {"domestic": "no", "international" : "no"}
+        self.availability = {"domestic": False, "international" : False}
         self.learning_mode = {"domestic": None, "international" : None}
         self.entry_score = {"domestic": None, "international" : None}
         self.duration = {"domestic": None, "international" : None}
         self.fees = {"domestic": None, "international" : None}
-        self.next_intake = {"domestic": [], "international": []}
+        self.next_intake = {"domestic": None, "international": None}
         self.location = {"domestic": None, "international" : None}
         self.degree_plans = {}
 
     # Getters
     def getDegreeName(self):
         return self.degree_name
-    
+
     def getLevelOfStudy(self):
         return self.level_of_study
 
@@ -40,14 +40,14 @@ class Degree:
 
     def getLocation(self):
         return self.location
-    
+
     def getDegreePlans(self):
         return self.degree_plans
 
     # Setters
     def setDegreeName(self, degree_name: str):
         self.degree_name = degree_name
-    
+
     def setLevelOfStudy(self, level_of_study):
         self.level_of_study = level_of_study
 
@@ -71,6 +71,6 @@ class Degree:
 
     def setLocation(self, student_type: str, location: str):
         self.location.update({student_type: location})
-    
+
     def setDegreePlans(self, degree_plan: DegreePlan):
         self.degree_plans.update({degree_plan.getPlanCode() : degree_plan})
