@@ -1,1 +1,0 @@
-__all__ = ["coordinator", "course_code", "course", "degree"]

@@ -1,43 +1,10 @@
-# import sqlite3
-
 from Objects.course_code import *
 from Objects.course import *
 from Objects.coordinator import *
-from Objects.course_contact import *
 from Objects.degree import *
 from Objects.degree_core import *
 from Objects.degree_plan import *
 from Objects.degree_option import *
-
-# class DBWriter:
-#     def writeCourseCode(self, array: dict[str, CourseCode]):
-#         try:
-#             connection = sqlite3.connect("/Users/isaac/Downloads/AIChatbot.db") # setup database connection
-#             cursor = connection.cursor() # object to execute sql queries
-
-#             # iterature thru keys (no values)
-#             for item in array:
-#                 # array {key : value}
-#                 array.get(item) # gets values based of key(item)
-
-                # cursor.execute("INSERT INTO course_code (course_name, course_code, campus, career, school, learning_mode) VALUES (?, ?)", CourseCode.getName(), CourseCode.getCode(), CourseCode.getCampus(), CourseCode.getCareer(), CourseCode.getSchool(), CourseCode.getLearningMode())
-#                 print(item)
-
-#             cursor.execute("SELECT * FROM course_code") # execute sql
-#             results = cursor.fetchall() # get results
-#             connection.commit() # saves changes in database (if needed)
-
-#             connection.close() # close connection (important!)
-#         except sqlite3.Error as error:
-#             print("Error while connecting to sqlite", error)
-
-#         finally:
-#             if (connection):
-#                 connection.close()
-#                 print("The SQLite connection is closed")
-
-
-# dbwriter.py
 
 import sqlite3
 
@@ -46,6 +13,10 @@ class DBWriter:
         self.db_path = db_path
 
     def writeCourseCode(self, array: dict[str, CourseCode]):
+        """
+            Writes course code information into database
+        """
+        
         try:
             con = sqlite3.connect(self.db_path)
             cur = con.cursor()
@@ -68,6 +39,9 @@ class DBWriter:
             con.close()
 
     def writeDegree(self, array: dict[str, Degree]):
+        """
+            Writes degree information into database
+        """
         try:
             con = sqlite3.connect(self.db_path)
             cur = con.cursor()
@@ -101,7 +75,7 @@ class DBWriter:
                         plans.getCreditDescription(),
                         plans.getMajorMinorDescription()
                     ))
-
+                    
                     if plans.getCoreUnits():
                         for course_code, year in plans.getCoreUnits().items():
                             cur.execute('''
@@ -112,6 +86,7 @@ class DBWriter:
                                 year,
                                 course_code
                             ))
+                    
                     if plans.getMajorOptions():
                         unique = list(plans.getMajorOptions().values())
                         unique = list(set(unique))  # Remove duplicates
@@ -131,6 +106,7 @@ class DBWriter:
                                 plans.getMajorOptions().get(courses),
                                 courses
                             ))
+                    
                     if plans.getMinorOptions():
                         unique = list(plans.getMinorOptions().values())
                         unique = list(set(unique))  # Remove duplicates
@@ -150,6 +126,7 @@ class DBWriter:
                                 plans.getMinorOptions().get(courses),
                                 courses
                             ))
+                    
                     if plans.getOtherOptions():
                         unique = list(plans.getOtherOptions().values())
                         unique = list(set(unique))  # Remove duplicates
@@ -177,6 +154,9 @@ class DBWriter:
             con.close()
 
     def writeCoordinator(self, array: dict[str, Coordinator]):
+        """
+            Write co-ordinator information into database
+        """
         try:
             con = sqlite3.connect(self.db_path)
             cur = con.cursor()
@@ -197,47 +177,11 @@ class DBWriter:
         finally:
             con.close()
 
-    def writeCourseContact(self, array: dict[str, CourseContact]):
-        try:
-            con = sqlite3.connect(self.db_path)
-            cur = con.cursor()
-            for course_contact_obj in array.values():
-                cur.execute('''
-                    INSERT INTO course_contact (contact_name, contact_phone, contact_email)
-                    VALUES (?, ?, ?)
-                ''', (
-                    course_contact_obj.getContactName(),
-                    course_contact_obj.getContactPhone(),
-                    course_contact_obj.getContactEmail()
-                ))
-            con.commit()
-        except sqlite3.Error as e:
-            print("Error while writing course contacts:", e)
-        finally:
-            con.close()
-
-
-
-    # def writeDegreeCore(self, array: dict[str, DegreeCore]):
-    #     try:
-    #         con = sqlite3.connect(self.db_path)
-    #         cur = con.cursor()
-    #         for degree_core_obj in array.values():
-    #             cur.execute('''
-    #                 INSERT INTO degree_core (degree_name, program_year, course_code)
-    #                 VALUES (?, ?, ?)
-    #             ''', (
-    #                 degree_core_obj.getDegreeName(),
-    #                 degree_core_obj.getCoreCourseCode(),
-    #                 degree_core_obj.getCoreCourseTitle()
-    #             ))
-    #         con.commit()
-    #     except sqlite3.Error as e:
-    #         print("Error while writing degree cores:", e)
-    #     finally:
-    #         con.close()
 
     def writeCourses(self, array: dict[str, Course]):
+        """
+            Write course information inro database
+        """
         try:
             con = sqlite3.connect(self.db_path)
             cur = con.cursor()
